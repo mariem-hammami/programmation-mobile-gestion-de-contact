@@ -1,216 +1,441 @@
-// Import des packages nécessaires
 import 'package:flutter/material.dart';
 
-// Fonction principale - point d'entrée de l'application
 void main() {
   runApp(const MyApp());
 }
 
-// Classe principale de l'application
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {
-    // MaterialApp est le widget racine qui configure l'application
     return MaterialApp(
-      title: 'Mon App d\'Authentification',
-      theme: ThemeData(
-        primarySwatch: Colors.blue, // Couleur principale
-      ),
-      home: const LoginScreen(), // Premier écran affiché
+      title: 'Application Authentification',
+      theme: ThemeData(primarySwatch: Colors.blue),
+      debugShowCheckedModeBanner: false,
+      home: const LoginScreen(),
     );
   }
 }
 
-// Écran de connexion - StatefulWidget car il gère un état (les champs de texte)
+/// ─────────────────────────────
+/// 🔐 PAGE DE CONNEXION
+/// ─────────────────────────────
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
 
   @override
-  _LoginScreenState createState() => _LoginScreenState();
+  State<LoginScreen> createState() => _LoginScreenState();
 }
 
-// État de l'écran de connexion
 class _LoginScreenState extends State<LoginScreen> {
-  // Contrôleurs pour récupérer les valeurs des champs de texte
-  final TextEditingController _emailController = TextEditingController();
-  final TextEditingController _passwordController = TextEditingController();
-
-  // Variable pour gérer le chargement
+  final _emailController = TextEditingController();
+  final _passwordController = TextEditingController();
   bool _isLoading = false;
 
-  // Méthode appelée quand on appuie sur le bouton de connexion
   void _handleLogin() {
-    // Récupération des valeurs
-    String email = _emailController.text;
-    String password = _passwordController.text;
+    String email = _emailController.text.trim();
+    String password = _passwordController.text.trim();
 
-    // Validation basique
     if (email.isEmpty || password.isEmpty) {
-      _showErrorDialog('Veuillez remplir tous les champs');
+      _showErrorDialog('Veuillez remplir tous les champs.');
       return;
     }
 
     if (!email.contains('@')) {
-      _showErrorDialog('Veuillez entrer un email valide');
+      _showErrorDialog('Veuillez entrer un email valide.');
       return;
     }
 
-    // Simulation de connexion
-    setState(() {
-      _isLoading = true;
-    });
-
-    // Simulation d'un appel réseau (2 secondes)
+    setState(() => _isLoading = true);
     Future.delayed(const Duration(seconds: 2), () {
-      setState(() {
-        _isLoading = false;
-      });
-      // Afficher un message de succès
-      _showSuccessDialog();
+      setState(() => _isLoading = false);
+
+      if (email == 'mariem@gmail.com' && password == '2004') {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (_) => const ContactHomePage()),
+        );
+      } else {
+        _showErrorDialog('Email ou mot de passe incorrect.');
+      }
     });
   }
 
-  // Méthode pour afficher une erreur
   void _showErrorDialog(String message) {
     showDialog(
       context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('Erreur'),
-          content: Text(message),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: const Text('OK'),
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  // Méthode pour afficher un succès
-  void _showSuccessDialog() {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('Succès'),
-          content:
-              Text('Connexion réussie ! Bienvenue ${_emailController.text}'),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-                // Réinitialiser les champs
-                _emailController.clear();
-                _passwordController.clear();
-              },
-              child: const Text('OK'),
-            ),
-          ],
-        );
-      },
+      builder: (_) => AlertDialog(
+        title: const Text('Erreur'),
+        content: Text(message),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('OK'),
+          ),
+        ],
+      ),
     );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // Scaffold fournit la structure de base de l'écran
       backgroundColor: Colors.grey[100],
       body: SafeArea(
-        // SafeArea évite les zones non sécurisées (encoche, etc.)
-        child: Padding(
-          padding: const EdgeInsets.all(24.0), // Marge intérieure
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center, // Centrer verticalement
-            children: [
-              // Titre
-              const Text(
-                'Connexion',
-                style: TextStyle(
-                  fontSize: 32,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.blue,
+        child: Center(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Icon(Icons.lock_outline, color: Colors.blue, size: 100),
+                const SizedBox(height: 20),
+                const Text(
+                  'Connexion',
+                  style: TextStyle(
+                      fontSize: 32,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.blue),
                 ),
-              ),
-              const SizedBox(height: 40), // Espacement
-              // Champ Email
-              TextField(
-                controller: _emailController,
-                decoration: const InputDecoration(
-                  labelText: 'Email',
-                  hintText: 'entrez@votre.email',
-                  prefixIcon: Icon(Icons.email), // Icône avant le texte
-                  border: OutlineInputBorder(), // Bordure
-                  filled: true,
-                  fillColor: Colors.white,
+                const SizedBox(height: 40),
+
+                // Champ email
+                TextField(
+                  controller: _emailController,
+                  decoration: const InputDecoration(
+                    labelText: 'Email',
+                    prefixIcon: Icon(Icons.email),
+                    border: OutlineInputBorder(),
+                    filled: true,
+                    fillColor: Colors.white,
+                  ),
                 ),
-                keyboardType: TextInputType.emailAddress, // Clavier adapté
-              ),
-              const SizedBox(height: 20), // Espacement
-              // Champ Mot de passe
-              TextField(
-                controller: _passwordController,
-                decoration: const InputDecoration(
-                  labelText: 'Mot de passe',
-                  hintText: 'Entrez votre mot de passe',
-                  prefixIcon: Icon(Icons.lock),
-                  border: OutlineInputBorder(),
-                  filled: true,
-                  fillColor: Colors.white,
+                const SizedBox(height: 20),
+
+                // Champ mot de passe
+                TextField(
+                  controller: _passwordController,
+                  decoration: const InputDecoration(
+                    labelText: 'Mot de passe',
+                    prefixIcon: Icon(Icons.lock),
+                    border: OutlineInputBorder(),
+                    filled: true,
+                    fillColor: Colors.white,
+                  ),
+                  obscureText: true,
                 ),
-                obscureText: true, // Cache le texte (pour les mots de passe)
-              ),
-              const SizedBox(height: 30),
-              // Bouton de connexion
-              _isLoading
-                  ? const CircularProgressIndicator() // Affiche un indicateur de chargement
-                  : ElevatedButton(
-                      onPressed: _handleLogin,
-                      child: const Padding(
-                        padding:
-                            EdgeInsets.symmetric(horizontal: 40, vertical: 15),
-                        child: Text(
+                const SizedBox(height: 30),
+
+                _isLoading
+                    ? const CircularProgressIndicator()
+                    : ElevatedButton(
+                        onPressed: _handleLogin,
+                        style: ElevatedButton.styleFrom(
+                          minimumSize: const Size(double.infinity, 50),
+                        ),
+                        child: const Text(
                           'Se connecter',
                           style: TextStyle(fontSize: 18),
                         ),
                       ),
-                    ),
-              const SizedBox(height: 20),
-              // Lien d'inscription
-              TextButton(
-                onPressed: () {
-                  // Pour l'instant, juste un message
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Fonctionnalité d\'inscription à venir !'),
-                    ),
-                  );
-                },
-                child: const Text(
-                  'Créer un compte',
-                  style: TextStyle(color: Colors.blue),
+                const SizedBox(height: 20),
+
+                // 🔹 BOUTON D’INSCRIPTION
+                TextButton(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (_) => const SignupPage()),
+                    );
+                  },
+                  child: const Text(
+                    'Créer un compte',
+                    style: TextStyle(color: Colors.blue, fontSize: 16),
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
     );
   }
+}
 
-  // Méthode appelée quand le widget est détruit
+/// ─────────────────────────────
+/// 🧾 PAGE D’INSCRIPTION
+/// ─────────────────────────────
+class SignupPage extends StatefulWidget {
+  const SignupPage({super.key});
+
   @override
-  void dispose() {
-    // Nettoyer les contrôleurs pour éviter les fuites de mémoire
-    _emailController.dispose();
-    _passwordController.dispose();
-    super.dispose();
+  State<SignupPage> createState() => _SignupPageState();
+}
+
+class _SignupPageState extends State<SignupPage> {
+  final _nomController = TextEditingController();
+  final _prenomController = TextEditingController();
+  final _emailController = TextEditingController();
+
+  void _handleSignup() {
+    String nom = _nomController.text.trim();
+    String prenom = _prenomController.text.trim();
+    String email = _emailController.text.trim();
+
+    if (nom.isEmpty || prenom.isEmpty || email.isEmpty) {
+      _showError('Veuillez remplir tous les champs.');
+      return;
+    }
+
+    if (!email.contains('@')) {
+      _showError('Veuillez entrer un email valide.');
+      return;
+    }
+
+    showDialog(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: const Text('Inscription réussie 🎉'),
+        content: Text('Bienvenue, $prenom $nom !'),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context);
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (_) => const LoginScreen()),
+              );
+            },
+            child: const Text('Retour à la connexion'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showError(String message) {
+    showDialog(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: const Text('Erreur'),
+        content: Text(message),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('OK'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Inscription'),
+        backgroundColor: Colors.blue,
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          children: [
+            const Text(
+              'Créer un compte',
+              style: TextStyle(
+                fontSize: 26,
+                fontWeight: FontWeight.bold,
+                color: Colors.blue,
+              ),
+            ),
+            const SizedBox(height: 30),
+
+            TextField(
+              controller: _nomController,
+              decoration: const InputDecoration(
+                labelText: 'Nom',
+                prefixIcon: Icon(Icons.person),
+                border: OutlineInputBorder(),
+              ),
+            ),
+            const SizedBox(height: 20),
+
+            TextField(
+              controller: _prenomController,
+              decoration: const InputDecoration(
+                labelText: 'Prénom',
+                prefixIcon: Icon(Icons.person_outline),
+                border: OutlineInputBorder(),
+              ),
+            ),
+            const SizedBox(height: 20),
+
+            TextField(
+              controller: _emailController,
+              decoration: const InputDecoration(
+                labelText: 'Email',
+                prefixIcon: Icon(Icons.email),
+                border: OutlineInputBorder(),
+              ),
+              keyboardType: TextInputType.emailAddress,
+            ),
+            const SizedBox(height: 30),
+
+            ElevatedButton(
+              onPressed: _handleSignup,
+              style: ElevatedButton.styleFrom(
+                minimumSize: const Size(double.infinity, 50),
+              ),
+              child: const Text(
+                'S\'inscrire',
+                style: TextStyle(fontSize: 18),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// ─────────────────────────────
+/// 📇 PAGE DE GESTION DES CONTACTS
+/// ─────────────────────────────
+class Contact {
+  String nom;
+  String numero;
+
+  Contact({required this.nom, required this.numero});
+}
+
+class ContactHomePage extends StatefulWidget {
+  const ContactHomePage({super.key});
+
+  @override
+  State<ContactHomePage> createState() => _ContactHomePageState();
+}
+
+class _ContactHomePageState extends State<ContactHomePage> {
+  final List<Contact> _contacts = [];
+  final TextEditingController _nomController = TextEditingController();
+  final TextEditingController _numeroController = TextEditingController();
+
+  void _ajouterContact() {
+    if (_nomController.text.isNotEmpty && _numeroController.text.isNotEmpty) {
+      setState(() {
+        _contacts.add(Contact(
+          nom: _nomController.text,
+          numero: _numeroController.text,
+        ));
+      });
+      _nomController.clear();
+      _numeroController.clear();
+      Navigator.pop(context);
+    }
+  }
+
+  void _modifierContact(int index) {
+    _nomController.text = _contacts[index].nom;
+    _numeroController.text = _contacts[index].numero;
+    showDialog(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: const Text('Modifier contact'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(controller: _nomController, decoration: const InputDecoration(labelText: 'Nom')),
+            TextField(controller: _numeroController, decoration: const InputDecoration(labelText: 'Numéro')),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              setState(() {
+                _contacts[index].nom = _nomController.text;
+                _contacts[index].numero = _numeroController.text;
+              });
+              _nomController.clear();
+              _numeroController.clear();
+              Navigator.pop(context);
+            },
+            child: const Text('Enregistrer'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _supprimerContact(int index) {
+    setState(() {
+      _contacts.removeAt(index);
+    });
+  }
+
+  void _ouvrirFormulaireAjout() {
+    showDialog(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: const Text('Nouveau contact'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(controller: _nomController, decoration: const InputDecoration(labelText: 'Nom')),
+            TextField(controller: _numeroController, decoration: const InputDecoration(labelText: 'Numéro')),
+          ],
+        ),
+        actions: [
+          TextButton(onPressed: _ajouterContact, child: const Text('Ajouter')),
+        ],
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Gestion des Contacts'),
+        centerTitle: true,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.logout),
+            onPressed: () {
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (_) => const LoginScreen()),
+              );
+            },
+          ),
+        ],
+      ),
+      body: _contacts.isEmpty
+          ? const Center(child: Text('Aucun contact ajouté.'))
+          : ListView.builder(
+              itemCount: _contacts.length,
+              itemBuilder: (context, index) {
+                return Card(
+                  margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                  child: ListTile(
+                    leading: const CircleAvatar(child: Icon(Icons.person)),
+                    title: Text(_contacts[index].nom),
+                    subtitle: Text(_contacts[index].numero),
+                    trailing: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        IconButton(icon: const Icon(Icons.edit), onPressed: () => _modifierContact(index)),
+                        IconButton(icon: const Icon(Icons.delete, color: Colors.red), onPressed: () => _supprimerContact(index)),
+                      ],
+                    ),
+                  ),
+                );
+              },
+            ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: _ouvrirFormulaireAjout,
+        child: const Icon(Icons.add),
+      ),
+    );
   }
 }
