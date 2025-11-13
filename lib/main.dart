@@ -4,6 +4,9 @@ void main() {
   runApp(const MyApp());
 }
 
+/// 💾 Liste globale d'utilisateurs
+List<Map<String, String>> usersList = [];
+
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
@@ -18,9 +21,7 @@ class MyApp extends StatelessWidget {
   }
 }
 
-/// ─────────────────────────────
 /// 🔐 PAGE DE CONNEXION
-/// ─────────────────────────────
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
 
@@ -42,16 +43,14 @@ class _LoginScreenState extends State<LoginScreen> {
       return;
     }
 
-    if (!email.contains('@')) {
-      _showErrorDialog('Veuillez entrer un email valide.');
-      return;
-    }
-
     setState(() => _isLoading = true);
-    Future.delayed(const Duration(seconds: 2), () {
+    Future.delayed(const Duration(seconds: 1), () {
       setState(() => _isLoading = false);
 
-      if (email == 'mariem@gmail.com' && password == '2004') {
+      bool userExists = usersList.any(
+          (user) => user['email'] == email && user['password'] == password);
+
+      if (userExists) {
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(builder: (_) => const ContactHomePage()),
@@ -99,8 +98,6 @@ class _LoginScreenState extends State<LoginScreen> {
                       color: Colors.blue),
                 ),
                 const SizedBox(height: 40),
-
-                // Champ email
                 TextField(
                   controller: _emailController,
                   decoration: const InputDecoration(
@@ -112,8 +109,6 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                 ),
                 const SizedBox(height: 20),
-
-                // Champ mot de passe
                 TextField(
                   controller: _passwordController,
                   decoration: const InputDecoration(
@@ -126,7 +121,6 @@ class _LoginScreenState extends State<LoginScreen> {
                   obscureText: true,
                 ),
                 const SizedBox(height: 30),
-
                 _isLoading
                     ? const CircularProgressIndicator()
                     : ElevatedButton(
@@ -140,8 +134,6 @@ class _LoginScreenState extends State<LoginScreen> {
                         ),
                       ),
                 const SizedBox(height: 20),
-
-                // 🔹 BOUTON D’INSCRIPTION
                 TextButton(
                   onPressed: () {
                     Navigator.push(
@@ -163,9 +155,7 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 }
 
-/// ─────────────────────────────
 /// 🧾 PAGE D’INSCRIPTION
-/// ─────────────────────────────
 class SignupPage extends StatefulWidget {
   const SignupPage({super.key});
 
@@ -177,13 +167,15 @@ class _SignupPageState extends State<SignupPage> {
   final _nomController = TextEditingController();
   final _prenomController = TextEditingController();
   final _emailController = TextEditingController();
+  final _passwordController = TextEditingController();
 
   void _handleSignup() {
     String nom = _nomController.text.trim();
     String prenom = _prenomController.text.trim();
     String email = _emailController.text.trim();
+    String password = _passwordController.text.trim();
 
-    if (nom.isEmpty || prenom.isEmpty || email.isEmpty) {
+    if (nom.isEmpty || prenom.isEmpty || email.isEmpty || password.isEmpty) {
       _showError('Veuillez remplir tous les champs.');
       return;
     }
@@ -192,6 +184,19 @@ class _SignupPageState extends State<SignupPage> {
       _showError('Veuillez entrer un email valide.');
       return;
     }
+
+    bool emailExiste = usersList.any((user) => user['email'] == email);
+    if (emailExiste) {
+      _showError('Cet email est déjà utilisé.');
+      return;
+    }
+
+    usersList.add({
+      'email': email,
+      'password': password,
+      'nom': nom,
+      'prenom': prenom,
+    });
 
     showDialog(
       context: context,
@@ -207,7 +212,7 @@ class _SignupPageState extends State<SignupPage> {
                 MaterialPageRoute(builder: (_) => const LoginScreen()),
               );
             },
-            child: const Text('Retour à la connexion'),
+            child: const Text('Se connecter'),
           ),
         ],
       ),
@@ -233,79 +238,42 @@ class _SignupPageState extends State<SignupPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Inscription'),
-        backgroundColor: Colors.blue,
-      ),
+      appBar: AppBar(title: const Text('Inscription'), backgroundColor: Colors.blue),
       body: Padding(
         padding: const EdgeInsets.all(24),
-        child: Column(
-          children: [
-            const Text(
-              'Créer un compte',
-              style: TextStyle(
-                fontSize: 26,
-                fontWeight: FontWeight.bold,
-                color: Colors.blue,
+        child: SingleChildScrollView(
+          child: Column(
+            children: [
+              const Text(
+                'Créer un compte',
+                style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold, color: Colors.blue),
               ),
-            ),
-            const SizedBox(height: 30),
-
-            TextField(
-              controller: _nomController,
-              decoration: const InputDecoration(
-                labelText: 'Nom',
-                prefixIcon: Icon(Icons.person),
-                border: OutlineInputBorder(),
+              const SizedBox(height: 30),
+              TextField(controller: _nomController, decoration: const InputDecoration(labelText: 'Nom', prefixIcon: Icon(Icons.person), border: OutlineInputBorder())),
+              const SizedBox(height: 20),
+              TextField(controller: _prenomController, decoration: const InputDecoration(labelText: 'Prénom', prefixIcon: Icon(Icons.person_outline), border: OutlineInputBorder())),
+              const SizedBox(height: 20),
+              TextField(controller: _emailController, decoration: const InputDecoration(labelText: 'Email', prefixIcon: Icon(Icons.email), border: OutlineInputBorder())),
+              const SizedBox(height: 20),
+              TextField(controller: _passwordController, decoration: const InputDecoration(labelText: 'Mot de passe', prefixIcon: Icon(Icons.lock), border: OutlineInputBorder()), obscureText: true),
+              const SizedBox(height: 30),
+              ElevatedButton(
+                onPressed: _handleSignup,
+                style: ElevatedButton.styleFrom(minimumSize: const Size(double.infinity, 50)),
+                child: const Text('S\'inscrire', style: TextStyle(fontSize: 18)),
               ),
-            ),
-            const SizedBox(height: 20),
-
-            TextField(
-              controller: _prenomController,
-              decoration: const InputDecoration(
-                labelText: 'Prénom',
-                prefixIcon: Icon(Icons.person_outline),
-                border: OutlineInputBorder(),
-              ),
-            ),
-            const SizedBox(height: 20),
-
-            TextField(
-              controller: _emailController,
-              decoration: const InputDecoration(
-                labelText: 'Email',
-                prefixIcon: Icon(Icons.email),
-                border: OutlineInputBorder(),
-              ),
-              keyboardType: TextInputType.emailAddress,
-            ),
-            const SizedBox(height: 30),
-
-            ElevatedButton(
-              onPressed: _handleSignup,
-              style: ElevatedButton.styleFrom(
-                minimumSize: const Size(double.infinity, 50),
-              ),
-              child: const Text(
-                'S\'inscrire',
-                style: TextStyle(fontSize: 18),
-              ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
   }
 }
 
-/// ─────────────────────────────
-/// 📇 PAGE DE GESTION DES CONTACTS
-/// ─────────────────────────────
+/// 📇 CONTACTS + RECHERCHE
 class Contact {
   String nom;
   String numero;
-
   Contact({required this.nom, required this.numero});
 }
 
@@ -318,16 +286,41 @@ class ContactHomePage extends StatefulWidget {
 
 class _ContactHomePageState extends State<ContactHomePage> {
   final List<Contact> _contacts = [];
+  List<Contact> _filteredContacts = []; // pour la recherche
   final TextEditingController _nomController = TextEditingController();
   final TextEditingController _numeroController = TextEditingController();
+  final TextEditingController _searchController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    _filteredContacts = _contacts;
+    _searchController.addListener(_filtrerContacts);
+  }
+
+  @override
+  void dispose() {
+    _nomController.dispose();
+    _numeroController.dispose();
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  void _filtrerContacts() {
+    String query = _searchController.text.toLowerCase();
+    setState(() {
+      _filteredContacts = _contacts.where((contact) {
+        return contact.nom.toLowerCase().contains(query) ||
+            contact.numero.contains(query);
+      }).toList();
+    });
+  }
 
   void _ajouterContact() {
     if (_nomController.text.isNotEmpty && _numeroController.text.isNotEmpty) {
       setState(() {
-        _contacts.add(Contact(
-          nom: _nomController.text,
-          numero: _numeroController.text,
-        ));
+        _contacts.add(Contact(nom: _nomController.text, numero: _numeroController.text));
+        _filteredContacts = _contacts;
       });
       _nomController.clear();
       _numeroController.clear();
@@ -336,8 +329,10 @@ class _ContactHomePageState extends State<ContactHomePage> {
   }
 
   void _modifierContact(int index) {
-    _nomController.text = _contacts[index].nom;
-    _numeroController.text = _contacts[index].numero;
+    Contact contact = _filteredContacts[index];
+    _nomController.text = contact.nom;
+    _numeroController.text = contact.numero;
+
     showDialog(
       context: context,
       builder: (_) => AlertDialog(
@@ -353,8 +348,9 @@ class _ContactHomePageState extends State<ContactHomePage> {
           TextButton(
             onPressed: () {
               setState(() {
-                _contacts[index].nom = _nomController.text;
-                _contacts[index].numero = _numeroController.text;
+                contact.nom = _nomController.text;
+                contact.numero = _numeroController.text;
+                _filteredContacts = _contacts;
               });
               _nomController.clear();
               _numeroController.clear();
@@ -369,7 +365,9 @@ class _ContactHomePageState extends State<ContactHomePage> {
 
   void _supprimerContact(int index) {
     setState(() {
-      _contacts.removeAt(index);
+      Contact contact = _filteredContacts[index];
+      _contacts.remove(contact);
+      _filteredContacts = _contacts;
     });
   }
 
@@ -402,36 +400,51 @@ class _ContactHomePageState extends State<ContactHomePage> {
           IconButton(
             icon: const Icon(Icons.logout),
             onPressed: () {
-              Navigator.pushReplacement(
-                context,
-                MaterialPageRoute(builder: (_) => const LoginScreen()),
-              );
+              Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => const LoginScreen()));
             },
           ),
         ],
       ),
-      body: _contacts.isEmpty
-          ? const Center(child: Text('Aucun contact ajouté.'))
-          : ListView.builder(
-              itemCount: _contacts.length,
-              itemBuilder: (context, index) {
-                return Card(
-                  margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                  child: ListTile(
-                    leading: const CircleAvatar(child: Icon(Icons.person)),
-                    title: Text(_contacts[index].nom),
-                    subtitle: Text(_contacts[index].numero),
-                    trailing: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        IconButton(icon: const Icon(Icons.edit), onPressed: () => _modifierContact(index)),
-                        IconButton(icon: const Icon(Icons.delete, color: Colors.red), onPressed: () => _supprimerContact(index)),
-                      ],
-                    ),
-                  ),
-                );
-              },
+      body: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: TextField(
+              controller: _searchController,
+              decoration: const InputDecoration(
+                labelText: 'Rechercher contact',
+                prefixIcon: Icon(Icons.search),
+                border: OutlineInputBorder(),
+              ),
             ),
+          ),
+          Expanded(
+            child: _filteredContacts.isEmpty
+                ? const Center(child: Text('Aucun contact trouvé.'))
+                : ListView.builder(
+                    itemCount: _filteredContacts.length,
+                    itemBuilder: (context, index) {
+                      Contact contact = _filteredContacts[index];
+                      return Card(
+                        margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                        child: ListTile(
+                          leading: const CircleAvatar(child: Icon(Icons.person)),
+                          title: Text(contact.nom),
+                          subtitle: Text(contact.numero),
+                          trailing: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              IconButton(icon: const Icon(Icons.edit), onPressed: () => _modifierContact(index)),
+                              IconButton(icon: const Icon(Icons.delete, color: Colors.red), onPressed: () => _supprimerContact(index)),
+                            ],
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+          ),
+        ],
+      ),
       floatingActionButton: FloatingActionButton(
         onPressed: _ouvrirFormulaireAjout,
         child: const Icon(Icons.add),
