@@ -1,8 +1,6 @@
 name: projet1
 description: "A new Flutter project."
-
-publish_to: 'none' # Remove this line if you wish to publish to pub.dev
-
+publish_to: 'none'
 version: 1.0.0+1
 
 environment:
@@ -14,13 +12,16 @@ dependencies:
 
   cupertino_icons: ^1.0.8
 
-  # Dépendance pour la navigation
   go_router: ^14.2.3
+
+  # Base de données SQLite Desktop + Mobile
+  sqflite: ^2.3.0
+  sqflite_common_ffi: ^2.3.2
+  path: ^1.9.0
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
-
   flutter_lints: ^5.0.0
 
 flutter:
