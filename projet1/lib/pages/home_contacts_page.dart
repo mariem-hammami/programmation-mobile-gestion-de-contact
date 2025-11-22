@@ -1,6 +1,6 @@
 // ignore_for_file: use_build_context_synchronously
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';  // Pour la déconnexion
+import 'package:go_router/go_router.dart';  // ⭐ IMPORT NECESSAIRE POUR DÉCONNEXION
 import '../services/db_helper.dart';
 import '../models/contact.dart';
 
@@ -137,12 +137,6 @@ class _HomeContactsPageState extends State<HomeContactsPage> {
 
   @override
   Widget build(BuildContext context) {
-    final filteredContacts = contacts.where((c) {
-      final q = searchQuery.toLowerCase();
-      return c.name.toLowerCase().contains(q) ||
-             c.phone.toLowerCase().contains(q);
-    }).toList();
-
     return Scaffold(
       appBar: AppBar(
         title: const Text("Contacts"),
@@ -167,72 +161,92 @@ class _HomeContactsPageState extends State<HomeContactsPage> {
               );
 
               if (confirm == true) {
-                context.go('/'); // GoRouter pour la déconnexion
+                context.go('/'); // ⭐ Utilisation correcte GoRouter
               }
             },
           ),
         ],
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(12),
-        child: Column(
-          children: [
-            TextField(
-              controller: searchCtrl,
-              decoration: const InputDecoration(
-                prefixIcon: Icon(Icons.search),
-                border: OutlineInputBorder(),
-                labelText: "Rechercher contact...",
-              ),
-              onChanged: (value) => setState(() => searchQuery = value),
+      body: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(12),
+            child: Column(
+              children: [
+                TextField(
+                  controller: nameCtrl,
+                  decoration: const InputDecoration(labelText: "Nom"),
+                ),
+                TextField(
+                  controller: phoneCtrl,
+                  decoration: const InputDecoration(labelText: "Téléphone"),
+                  keyboardType: TextInputType.phone,
+                ),
+                const SizedBox(height: 8),
+                ElevatedButton(
+                  onPressed: addContact,
+                  child: const Text("Ajouter Contact"),
+                ),
+              ],
             ),
-            const SizedBox(height: 12),
-            TextField(
-              controller: nameCtrl,
-              decoration: const InputDecoration(
-                border: OutlineInputBorder(), labelText: "Nom"),
-            ),
-            const SizedBox(height: 8),
-            TextField(
-              controller: phoneCtrl,
-              decoration: const InputDecoration(
-                border: OutlineInputBorder(), labelText: "Téléphone"),
-            ),
-            const SizedBox(height: 8),
-            ElevatedButton(
-              onPressed: addContact,
-              child: const Text("Ajouter Contact"),
-            ),
-            const SizedBox(height: 12),
-            Expanded(
-              child: filteredContacts.isEmpty
-                  ? const Center(child: Text("Aucun contact"))
-                  : ListView.builder(
-                      itemCount: filteredContacts.length,
-                      itemBuilder: (context, i) {
-                        final c = filteredContacts[i];
-                        return ListTile(
-                          title: Text(c.name),
-                          subtitle: Text(c.phone),
-                          trailing: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              IconButton(
-                                icon: const Icon(Icons.edit, color: Colors.blue),
-                                onPressed: () => editContact(c),
-                              ),
-                              IconButton(
-                                icon: const Icon(Icons.delete, color: Colors.red),
-                                onPressed: () => deleteContact(c.id!),
-                              ),
-                            ],
-                          ),
-                        );
-                      },
+          ),
+
+          Expanded(
+            child: Column(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 12),
+                  child: TextField(
+                    controller: searchCtrl,
+                    decoration: const InputDecoration(
+                      labelText: "Rechercher...",
+                      prefixIcon: Icon(Icons.search),
                     ),
+                    onChanged: (value) {
+                      setState(() => searchQuery = value.trim().toLowerCase());
+                    },
+                  ),
+                ),
+                const SizedBox(height: 10),
+
+                Expanded(
+                  child: contacts.isEmpty
+                      ? const Center(child: Text("Aucun contact"))
+                      : ListView.builder(
+                          itemCount: contacts.length,
+                          itemBuilder: (ctx, i) {
+                            final c = contacts[i];
+
+                            if (searchQuery.isNotEmpty &&
+                                !c.name.toLowerCase().contains(searchQuery) &&
+                                !c.phone.toLowerCase().contains(searchQuery)) {
+                              return const SizedBox.shrink();
+                            }
+
+                            return ListTile(
+                              title: Text(c.name),
+                              subtitle: Text(c.phone),
+                              trailing: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  IconButton(
+                                    icon: const Icon(Icons.edit, color: Colors.blue),
+                                    onPressed: () => editContact(c),
+                                  ),
+                                  IconButton(
+                                    icon: const Icon(Icons.delete, color: Colors.red),
+                                    onPressed: () => deleteContact(c.id!),
+                                  ),
+                                ],
+                              ),
+                            );
+                          },
+                        ),
+                ),
+              ],
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

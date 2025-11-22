@@ -1,12 +1,10 @@
 class Contact {
-  int? id;        // id optionnel pour SQLite
-  String name;    // nom du contact
-  String phone;   // téléphone du contact
+  int? id;
+  String name;
+  String phone;
 
-  // Constructeur
   Contact({this.id, required this.name, required this.phone});
 
-  // Convertir en Map pour SQLite
   Map<String, dynamic> toMap() {
     return {
       if (id != null) 'id': id,
@@ -15,7 +13,6 @@ class Contact {
     };
   }
 
-  // Créer un Contact depuis une Map (SQLite)
   factory Contact.fromMap(Map<String, dynamic> map) {
     return Contact(
       id: map['id'],

@@ -43,7 +43,7 @@ class _SignupPageState extends State<SignupPage> {
       const SnackBar(content: Text("Compte créé avec succès !")),
     );
 
-    context.go('/');  // Retour à la page login
+    context.go('/');  // 🔥 Retour à la page login
   }
 
   @override
